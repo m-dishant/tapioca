@@ -2,7 +2,6 @@ package me.anharu.video_editor
 
 import android.Manifest
 import android.app.Activity
-import android.content.pm.PackageManager
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import com.daasuu.mp4compose.composer.Mp4Composer
@@ -15,7 +14,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 
-class VideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler, ActivityAware, PluginRegistry.RequestPermissionsResultListener {
+class VideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler, ActivityAware {
     private var activity: Activity? = null
     private var methodChannel: MethodChannel? = null
     private var eventChannel: EventChannel? = null
@@ -82,7 +81,8 @@ class VideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
     // ActivityAware
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activity = binding.activity
-        binding.addRequestPermissionsResultListener(this)
+        // If you need to handle permissions, add a listener here
+        // binding.addRequestPermissionsResultListener(...)
     }
 
     override fun onDetachedFromActivity() {
@@ -95,11 +95,6 @@ class VideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
 
     override fun onDetachedFromActivityForConfigChanges() {
         onDetachedFromActivity()
-    }
-
-    // Permissions
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray): Boolean {
-        return requestCode == myPermissionCode
     }
 
     private fun checkPermission(activity: Activity) {
