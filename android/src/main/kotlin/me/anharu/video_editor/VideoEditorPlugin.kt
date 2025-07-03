@@ -39,31 +39,35 @@ class VideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
         if (call.method == "getPlatformVersion") {
             result.success("Android ${android.os.Build.VERSION.RELEASE}")
         } else if (call.method == "writeVideofile") {
-            val getActivity = activity
-            if (getActivity == null) {
+            val currentActivity = activity
+            if (currentActivity == null) {
                 result.error("activity_not_found", "Activity is not found.", null)
                 return
             }
+
             if (eventSink == null) {
                 println("event_sink_null Warning: eventSink is null. Make sure Flutter is listening to the event channel")
             }
-            checkPermission(getActivity)
+
+            checkPermission(currentActivity)
 
             val srcFilePath: String = call.argument("srcFilePath") ?: run {
-                result.error("src_file_path_not_found", "the src file path is not found.", null)
+                result.error("src_file_path_not_found", "The source file path is not found.", null)
                 return
             }
+
             val destFilePath: String = call.argument("destFilePath") ?: run {
-                result.error("dest_file_path_not_found", "the dest file path is not found.", null)
+                result.error("dest_file_path_not_found", "The destination file path is not found.", null)
                 return
             }
-            val processing: HashMap<String, HashMap<String, Any>> = call.argument("processing")
-                ?: run {
-                    result.error("processing_data_not_found", "the processing is not found.", null)
-                    return
-                }
+
+            val processing: HashMap<String, HashMap<String, Any>> = call.argument("processing") ?: run {
+                result.error("processing_data_not_found", "Processing data is not found.", null)
+                return
+            }
+
             val generator = VideoGeneratorService(Mp4Composer(srcFilePath, destFilePath))
-            generator.writeVideofile(processing, result, getActivity, eventSink)
+            generator.writeVideofile(processing, result, currentActivity, eventSink)
         } else {
             result.notImplemented()
         }
@@ -81,8 +85,6 @@ class VideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
     // ActivityAware
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activity = binding.activity
-        // If you need to handle permissions, add a listener here
-        // binding.addRequestPermissionsResultListener(...)
     }
 
     override fun onDetachedFromActivity() {
@@ -100,7 +102,10 @@ class VideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
     private fun checkPermission(activity: Activity) {
         ActivityCompat.requestPermissions(
             activity,
-            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE),
+            arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ),
             myPermissionCode
         )
     }
